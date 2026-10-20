@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The minutes workflow, start to finish · Andrew Park</title>
+<meta name="description" content="How Andrew Park's meeting-to-minutes workflow works: what goes in, what the AI does, what he checks, and what gets deleted." />
+<meta name="robots" content="noindex" />
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23102C44'/%3E%3Ccircle%20cx='22'%20cy='22'%20r='4'%20fill='%23CEFF00'/%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+  --navy: #102C44;
+  --atlantic: #1B5A7A;
+  --cerulean: #9CC9E8;
+  --gold: #9CC9E8;
+  --floral: #F2F5F8;
+  --slate: #35506B;
+  --warm-off-white: #F2F5F8;
+  --light-blue-gray: #E9EFF4;
+  --near-black: #102C44;
+
+  --ff-heading: "Montserrat", system-ui, sans-serif;
+  --ff-body: "Inter", system-ui, sans-serif;
+  --ff-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+  --col: 1180px;
+  --gutter: clamp(20px, 5vw, 48px);
+  --section-y: clamp(80px, 10vw, 132px);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+body { margin: 0; font-family: var(--ff-body); font-size: 19px; line-height: 1.6; color: var(--near-black); background: var(--warm-off-white); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+h1, h2, h3, h4 { font-family: var(--ff-heading); font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; margin: 0; }
+h1 { font-size: clamp(36px, 5.5vw, 64px); letter-spacing: -0.02em; }
+h2 { font-size: clamp(28px, 3.4vw, 44px); }
+h3 { font-size: clamp(20px, 2vw, 26px); }
+p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+
+.wrap { max-width: var(--col); margin: 0 auto; padding-inline: var(--gutter); }
+.section { padding-block: var(--section-y); }
+.section--dark { background: var(--navy); color: var(--floral); }
+.section--light { background: var(--warm-off-white); color: var(--near-black); }
+.section--panel { background: var(--light-blue-gray); color: var(--near-black); }
+
+.eyebrow { font-family: var(--ff-mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); display: inline-flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+.eyebrow::before { content: ""; display: inline-block; width: 28px; height: 1px; background: var(--gold); }
+.section--light .eyebrow, .section--panel .eyebrow { color: #5E7286; }
+
+/* Nav */
+.nav { position: sticky; top: 0; z-index: 50; background: rgba(16,44,68, 0.92); backdrop-filter: saturate(140%) blur(10px); -webkit-backdrop-filter: saturate(140%) blur(10px); color: var(--floral); border-bottom: 1px solid rgba(216,224,232,0.08); }
+.nav__inner { max-width: var(--col); margin: 0 auto; padding: 18px var(--gutter); display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.nav__brand { font-family: var(--ff-heading); font-weight: 700; font-size: 18px; }
+.nav__brand .dot { color: var(--gold); }
+.nav__links { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.nav__links a { color: rgba(216,224,232,0.85); padding: 8px 16px; border-radius: 4px; border: 1px solid rgba(216,224,232,0.12); background: rgba(216,224,232,0.04); transition: all 180ms ease; font-weight: 500; }
+.nav__links a:hover { color: var(--floral); background: rgba(216,224,232,0.1); border-color: rgba(216,224,232,0.25); }
+.nav__links a.is-cta { color: var(--navy); background: var(--gold); border-color: var(--gold); font-weight: 600; }
+.nav__links a.is-cta:hover { background: transparent; color: var(--gold); }
+.nav__menu-btn { display: none; background: transparent; border: 1px solid rgba(216,224,232,0.25); color: var(--floral); padding: 6px 10px; font-family: var(--ff-mono); font-size: 12px; letter-spacing: 0.1em; cursor: pointer; border-radius: 4px; }
+@media (max-width: 720px) {
+  .nav__links { display: none; }
+  .nav__menu-btn { display: inline-flex; }
+  .nav.is-open .nav__links { display: flex; position: absolute; top: 100%; left: 0; right: 0; background: var(--navy); flex-direction: column; align-items: stretch; gap: 0; padding: 8px var(--gutter) 16px; border-bottom: 1px solid rgba(216,224,232,0.08); }
+  .nav.is-open .nav__links a { padding: 12px 0; border-top: 1px solid rgba(216,224,232,0.08); }
+}
+
+/* Hero */
+.hero { background: var(--navy); color: var(--floral); padding-block: clamp(72px, 10vw, 140px) clamp(60px, 8vw, 100px); position: relative; overflow: hidden; }
+.hero__bg { position: absolute; inset: 0; background: radial-gradient(60% 50% at 80% 20%, rgba(27,90,122, 0.55) 0%, transparent 60%), radial-gradient(50% 40% at 20% 80%, rgba(156,201,232, 0.06) 0%, transparent 70%); pointer-events: none; }
+.hero__inner { position: relative; }
+.hero__line { font-family: var(--ff-heading); font-weight: 800; font-size: clamp(36px, 5.5vw, 64px); line-height: 1.1; max-width: 18ch; text-wrap: balance; margin-bottom: 28px; }
+.hero__line .accent { color: var(--gold); }
+.hero__sub { color: rgba(216,224,232,0.75); font-size: 20px; line-height: 1.6; max-width: 52ch; margin-bottom: 40px; }
+.hero__nav { display: flex; flex-wrap: wrap; gap: 12px; }
+
+.btn { display: inline-flex; align-items: center; gap: 10px; font-family: var(--ff-body); font-weight: 500; font-size: 15px; padding: 12px 20px; border-radius: 2px; border: 1px solid currentColor; transition: all 180ms ease; cursor: pointer; color: inherit; background: transparent; }
+.btn--gold { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+.btn--gold:hover { background: transparent; color: var(--gold); }
+.btn--ghost { color: rgba(216,224,232,0.85); border-color: rgba(216,224,232,0.4); }
+.btn--ghost:hover { color: var(--floral); border-color: var(--floral); }
+.btn .arrow { transition: transform 200ms ease; }
+.btn:hover .arrow { transform: translateX(4px); }
+
+/* Section head */
+.section__head { margin-bottom: 56px; max-width: 48ch; }
+.section__head h2 { text-wrap: balance; margin-bottom: 16px; }
+.section__head p { font-size: 20px; line-height: 1.6; color: var(--slate); }
+.section--dark .section__head p { color: rgba(216,224,232,0.75); }
+
+/* Problem */
+.problem__grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 28px; margin-top: 48px; }
+@media (max-width: 820px) { .problem__grid { grid-template-columns: 1fr; } }
+.problem-card { background: rgba(27,90,122, 0.4); border-left: 2px solid var(--gold); padding: 28px 26px; }
+.problem-card h4 { font-family: var(--ff-mono); font-size: 14px; font-weight: 500; color: var(--gold); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px; }
+.problem-card p { color: rgba(216,224,232,0.82); font-size: 18px; line-height: 1.6; }
+
+
+
+
+
+/* Workflow cards */
+.workflow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 48px; }
+@media (max-width: 820px) { .workflow-grid { grid-template-columns: 1fr; } }
+.workflow-card { background: #fff; border: 1px solid rgba(16,44,68,0.08); padding: 32px; display: flex; flex-direction: column; gap: 16px; transition: transform 240ms ease, border-color 240ms ease; }
+.workflow-card:hover { transform: translateY(-2px); border-color: rgba(156,201,232,0.55); }
+.workflow-card h3 { font-size: 22px; }
+.workflow-card p { font-size: 18px; line-height: 1.6; color: var(--slate); }
+.workflow-card .tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.workflow-card--dark { background: var(--navy); color: var(--floral); border-color: rgba(156,201,232,0.2); }
+.workflow-card--dark:hover { border-color: var(--gold); }
+.workflow-card--dark p { color: rgba(216,224,232,0.75); }
+
+
+
+
+
+/* Stats strip */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid rgba(216,224,232,0.12); border-bottom: 1px solid rgba(216,224,232,0.12); margin-bottom: 56px; }
+@media (max-width: 720px) { .stats { grid-template-columns: 1fr 1fr; } }
+.stat { padding: 36px 24px; border-right: 1px solid rgba(216,224,232,0.12); }
+.stat:last-child { border-right: 0; }
+@media (max-width: 720px) { .stat:nth-child(2n) { border-right: 0; } .stat:nth-child(-n+2) { border-bottom: 1px solid rgba(216,224,232,0.12); } }
+.stat__num { font-family: var(--ff-heading); font-weight: 800; font-size: clamp(44px, 5vw, 64px); color: var(--gold); line-height: 1; letter-spacing: -0.02em; margin-bottom: 10px; }
+.stat__num .plus { font-size: 0.55em; vertical-align: top; margin-left: 2px; }
+.stat__label { color: rgba(216,224,232,0.78); font-size: 16px; line-height: 1.4; }
+
+/* Closing */
+.closing { background: var(--navy); color: var(--floral); padding-block: clamp(80px, 10vw, 120px); border-top: 1px solid rgba(216,224,232,0.08); }
+.closing__inner { display: flex; flex-direction: column; align-items: flex-start; gap: 36px; }
+.closing h2 { font-size: clamp(28px, 4vw, 44px); text-wrap: balance; max-width: 22ch; }
+.closing__links { display: flex; flex-wrap: wrap; gap: 14px; }
+
+footer.foot { background: var(--navy); color: rgba(216,224,232,0.72); font-family: var(--ff-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 28px 0; border-top: 1px solid rgba(216,224,232,0.06); }
+footer.foot .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity 700ms ease, transform 700ms ease; }
+.reveal.is-in { opacity: 1; transform: none; }
+.stats--three { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 720px) { .stats--three { grid-template-columns: 1fr; } .stats--three .stat { border-right: 0; border-bottom: 1px solid rgba(216,224,232,0.12); } }
+
+/* Petrol Paper v1.2.0 palette layer (AI4NC/brand/petrol_paper_tokens_v1.css). Navy bands are the
+   inverse field; citron (#CEFF00) appears only as decorative slivers on navy, never as text. */
+.hero__bg { display: none; }
+.eyebrow::before, .section--dark .eyebrow::before, .hero .eyebrow::before, .through .eyebrow::before, .closing .eyebrow::before { background: #CEFF00; }
+.section--light .eyebrow::before, .section--panel .eyebrow::before, .about .eyebrow::before, .built .eyebrow::before { background: #1B5A7A; }
+.hero__name .accent, .nav__brand .dot { color: #CEFF00; }
+.hero__line .accent { color: #9CC9E8; }
+.principle, .problem-card { border-left-color: #CEFF00; }
+.btn--gold, .nav__links a.is-cta { background: #F2F5F8; color: #102C44; border-color: #F2F5F8; }
+.btn--gold:hover, .nav__links a.is-cta:hover { background: transparent; color: #F2F5F8; border-color: #F2F5F8; }
+.section--light .btn--gold, .section--panel .btn--gold { background: #1B5A7A; color: #FFFFFF; border-color: #1B5A7A; }
+.project, .workflow-card { border-color: #D3DDE5; }
+.project:hover, .workflow-card:hover { border-color: #102C44; box-shadow: 4px 4px 0 #102C44; }
+.project--feature, .workflow-card--dark { background: #102C44; border-color: #102C44; }
+.project--feature:hover, .workflow-card--dark:hover { box-shadow: 4px 4px 0 #1B5A7A; }
+.project__num { color: #5E7286; }
+.project--feature .project__num, .project--feature .project__schematic .ix { color: #9CC9E8; }
+.project__schematic .ix { color: #1B5A7A; }
+.project__link { color: #2F6B3F; border-bottom-color: #2F6B3F; }
+.project--feature .project__link { color: #9CC9E8; border-bottom-color: #9CC9E8; }
+.plain-list li::before { background: #1B5A7A; }
+::selection { background: #F2FAD0; color: #102C44; }
+:focus-visible { outline: 2px solid #1B5A7A; outline-offset: 2px; }
+.section--dark :focus-visible, .hero :focus-visible, .through :focus-visible, .closing :focus-visible, .nav :focus-visible { outline-color: #CEFF00; }
+.about .eyebrow, .built .eyebrow, .section--light .eyebrow { color: #5E7286; }
+.section--panel .eyebrow { color: #35506B; }
+</style>
+</head>
+
+<body>
+
+<nav class="nav" id="nav">
+  <div class="nav__inner">
+    <a href="index.html" class="nav__brand">Andrew Park<span class="dot">.</span></a>
+    <button class="nav__menu-btn" id="navMenuBtn" aria-label="Toggle menu">Menu</button>
+    <div class="nav__links">
+      <a href="#problem">The problem</a>
+      <a href="#how">How it works</a>
+      <a href="#results">Results</a>
+      <a href="#other">Other workflows</a>
+      <a class="is-cta" href="index.html">← Andrew Park</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="hero__bg"></div>
+  <div class="wrap hero__inner">
+    <span class="eyebrow reveal">Bakersfield College · Marketing and Public Relations</span>
+    <h1 class="hero__line reveal">Meeting minutes, <span class="accent">start to finish.</span></h1>
+    <p class="hero__sub reveal">Minutes are one of the most repeated jobs in executive support. This is the workflow I built for my office: what goes in, what the AI does, what I check, and what gets deleted.</p>
+    <div class="hero__nav reveal">
+      <a class="btn btn--gold" href="#how">How it works <span class="arrow">↓</span></a>
+      <a class="btn btn--ghost" href="index.html">← Back to Andrew Park</a>
+    </div>
+  </div>
+</header>
+
+<section class="section section--dark" id="problem">
+  <div class="wrap">
+    <div class="section__head reveal">
+      <span class="eyebrow">M1 · The problem</span>
+      <h2>Two to three hours a meeting, by hand.</h2>
+      <p>Drafting minutes by hand typically took two to three hours a meeting, and my office's meetings arrive in different forms.</p>
+    </div>
+    <div class="problem__grid">
+      <div class="problem-card reveal"><h4>Digital meetings</h4><p>Teams and Zoom calls already carry a speaker-labelled transcript. The work is turning it into minutes people can act on.</p></div>
+      <div class="problem-card reveal"><h4>In-person meetings</h4><p>Planning sessions, trainings and committee meetings where the only record is a recording.</p></div>
+      <div class="problem-card reveal"><h4>Names and privacy</h4><p>Transcripts misspell names, and some recordings hold things that should not sit on a server after the minutes are done.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--light" id="how">
+  <div class="wrap">
+    <div class="section__head reveal">
+      <span class="eyebrow">M2 · How it works</span>
+      <h2>Five steps, one of them mine.</h2>
+      <p>The AI drafts. I check the names, finish the document and send it.</p>
+    </div>
+    <div class="workflow-grid">
+      <div class="workflow-card reveal"><h3>1 · Capture</h3><p>A Teams or Zoom meeting already produces a speaker-labelled transcript, and digital meetings can also come in through the Fathom meeting recorder. For an in-person meeting, I record it and transcribe the recording on my own laptop.</p></div>
+      <div class="workflow-card reveal"><h3>2 · Draft</h3><p>A Claude skill I built reads the transcript and writes minutes in the College's branded format, with decisions, action items and the details I want on record.</p></div>
+      <div class="workflow-card workflow-card--dark reveal"><h3>3 · Check names</h3><p>The skill flags every name it is unsure of against a list of College names and waits for me to confirm or correct each one. It is a review gate, not an auto-correct.</p></div>
+      <div class="workflow-card reveal"><h3>4 · Finish</h3><p>I finish the minutes in Word and send them.</p></div>
+      <div class="workflow-card reveal"><h3>5 · Clean up</h3><p>Sensitive recordings and transcripts are destroyed as soon as the internal minutes are made. Other voice memos and transcripts are deleted on a schedule by an automated job.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--dark" id="results">
+  <div class="wrap">
+    <div class="section__head reveal">
+      <span class="eyebrow">M3 · Results</span>
+      <h2>Minutes in a fraction of the time.</h2>
+    </div>
+    <div class="stats stats--three reveal">
+      <div class="stat"><div class="stat__num">10–30</div><div class="stat__label">minutes from transcript to finished minutes, about 10 when the transcript already has speaker labels</div></div>
+      <div class="stat"><div class="stat__num">2–3</div><div class="stat__label">hours that drafting minutes by hand typically took</div></div>
+      <div class="stat"><div class="stat__num">25</div><div class="stat__label">finished sets of minutes in the office's files, including ones made with earlier versions of the workflow</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--panel" id="other">
+  <div class="wrap">
+    <div class="section__head reveal">
+      <span class="eyebrow">M4 · Other workflows in the office</span>
+      <h2>The rest of the routine.</h2>
+    </div>
+    <div class="workflow-grid">
+      <div class="workflow-card reveal"><h3>Monthly board report</h3><p>A Claude skill that builds the report to the Board of Trustees in Canva. A colleague now runs it on his own computer.</p></div>
+      <div class="workflow-card reveal"><h3>Work tracker</h3><p>A Notion tracker for accounts, agreements, events, travel, leave, tasks and a call log, built and run through Claude, with the District's budget figures for 18 accounts pushed in by script.</p></div>
+      <div class="workflow-card reveal"><h3>Spending check</h3><p>A script, used alongside my own manual reconciliation, that checks the department's spending records against the District finance system.</p></div>
+      <div class="workflow-card reveal"><h3>Absence log</h3><p>A Google Form that writes each staff absence to the office's log automatically.</p></div>
+      <div class="workflow-card reveal"><h3>Drafting in the office's voice</h3><p>Tools that draft press releases, media advisories and invitations from past approved emails, and remarks in an executive's voice.</p></div>
+      <div class="workflow-card reveal"><h3>Foundation content calendar</h3><p>Skill files, a research document and a living spreadsheet the Foundation's social media manager uses to plan each month's posts.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section closing" id="closing">
+  <div class="wrap closing__inner reveal">
+    <h2>Happy to walk through it live.</h2>
+    <div class="closing__links">
+      <a class="btn btn--gold" href="index.html">← Back to Andrew Park</a>
+      <a class="btn btn--ghost" href="https://www.linkedin.com/in/andrew-park-209bb9349/" target="_blank" rel="noopener">LinkedIn <span class="arrow">↗</span></a>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>© Andrew Park · 2026</span>
+    <span>Built with Claude</span>
+  </div>
+</footer>
+
+<script>
+const navEl = document.getElementById('nav');
+document.getElementById('navMenuBtn').addEventListener('click', () => navEl.classList.toggle('is-open'));
+document.querySelectorAll('.nav__links a').forEach(a => a.addEventListener('click', () => navEl.classList.remove('is-open')));
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-in'); revealObs.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+</script>
+
+</body>
+</html>
